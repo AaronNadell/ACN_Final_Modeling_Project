@@ -82,12 +82,12 @@ rotate <- function(x) t(apply(x, 2, rev))
 num.for <- 999
 for (i in 1:num.for){ #main for loop
   if (i<= (num.for/3)){ #generates 2000 samples of squares
-    matrix_storage2 <- cbind(matrix_storage2, image.generator("square"))}
+    matrix_storage2 <- rbind(matrix_storage2, image.generator("square"))}
   if ((num.for/3) < i && i<= (num.for*(2/3))){
-    matrix_storage2 <- cbind(matrix_storage2, image.generator("random"))
+    matrix_storage2 <- rbind(matrix_storage2, image.generator("random"))
   }
   if ((num.for*(2/3)) < i&& i <= num.for){
-    matrix_storage2 <- cbind(matrix_storage2, image.generator("lines"))
+    matrix_storage2 <- rbind(matrix_storage2, image.generator("lines"))
   }
 }
 #generates the category name data of 2000 square, random, and line images
@@ -101,12 +101,12 @@ category_names2 <- array(c(0,rep(0, 333), rep(1, 333), rep(2, 333)), 1000)
 num.for2 <- 333
 for (i in 1:num.for2){ #main for loop
   if (i<= (num.for2/3)){ #generates 2000 samples of squares
-    matrix_storage <- cbind(matrix_storage, image.generator("square"))}
+    matrix_storage <- rbind(matrix_storage, image.generator("square"))}
   if ((num.for2/3) < i && i<= (num.for2*(2/3))){
-    matrix_storage <- cbind(matrix_storage, image.generator("random"))
+    matrix_storage <- rbind(matrix_storage, image.generator("random"))
   }
   if ((num.for2*(2/3)) < i&& i <= num.for2){
-    matrix_storage <- cbind(matrix_storage, image.generator("lines"))
+    matrix_storage <- rbind(matrix_storage, image.generator("lines"))
   }
 }
 
@@ -152,7 +152,8 @@ my_model %>% compile(
   metrics = c('accuracy')
 )
 # saving model and running it on different data 
-history5<- as.data.frame(my_model %>% fit (x_train, y_train, epochs = 10)) #I manually changed this line
+history<- as.data.frame(my_model %>% 
+                           fit(x_train, y_train, epochs = 10, callbacks = callback_tensorboard("3logs/run_n05"))) #I manually changed this line
 #with the number corresponding to the number of nodes
 score <- my_model %>% evaluate(x_test, y_test)
 
@@ -161,6 +162,13 @@ cat('Test accuracy', score$acc, "\n")
 
 loss <- c(loss, score$loss)
 accuracy <- c(accuracy, score$acc)
+callback_tensorboard(log_dir = "3logs/run_n01")
+callback_tensorboard(log_dir = "3logs/run_n02")
+callback_tensorboard(log_dir = "3logs/run_n03")
+callback_tensorboard(log_dir = "3logs/run_n04")
+callback_tensorboard(log_dir = "3logs/run_n05")
+tensorboard("3logs")
+
 
 #this is data that I manually recorded (don't be mad I thought it was more time efficient)
 Nodes1<- (1:5)
