@@ -266,14 +266,14 @@ my_model2 %>% compile(
 history <- my_model2 %>% fit(
   x_train, y_train,
   epochs = 10,
-  callbacks = callback_tensorboard("logs/run_n05")
+  callbacks = callback_tensorboard("4llogs/run_n05")
 )
-callback_tensorboard(log_dir = "logs/run_n01")
-callback_tensorboard(log_dir = "logs/run_n02")
-callback_tensorboard(log_dir = "logs/run_n03")
-callback_tensorboard(log_dir = "logs/run_n04")
-callback_tensorboard(log_dir = "logs/run_n05")
-tensorboard("logs")
+callback_tensorboard(log_dir = "4llogs/run_n01")
+callback_tensorboard(log_dir = "4llogs/run_n02")
+callback_tensorboard(log_dir = "4llogs/run_n03")
+callback_tensorboard(log_dir = "4llogs/run_n04")
+callback_tensorboard(log_dir = "4llogs/run_n05")
+tensorboard("4llogs")
 
 #with the number corresponding to the number of nodes
 score <- my_model %>% evaluate(x_test, y_test)
