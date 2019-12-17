@@ -13,8 +13,8 @@ library(glue)
 length <- 100 #length of the image
 width <- 100 #width of the image
 image.blank <- matrix(rep(0, (width*length)), nrow = length, ncol = width) #inialize a matrix
-matrix_storage <- list() #used to store a list of matrices for testing
-matrix_storage2 <- list() #used to store a list of matrices for training
+matrix_storage <- matrix(0, nrow = 100, ncol = 100) #used to store a list of matrices for testing
+matrix_storage2 <- matrix(0, nrow = 100, ncol = 100) #used to store a list of matrices for training
 
 image.generator <- function(shape){ #generates a shape given a string with name of desired shape
   # the output will be a matrix with the desired shape as 1s
@@ -79,37 +79,39 @@ rotate <- function(x) t(apply(x, 2, rev))
 
 #Generates training data
 # this makes a list of 2000 of each image category in a row
-for (i in 1:6000){ #main for loop
-  if (i<= 2000){ #generates 2000 samples of squares
-    matrix_storage2[[i]] <- image.generator("square")}
-  if (2000 < i && i<= 4000){
-    matrix_storage2[[i]] <- image.generator("random")
+num.for <- 999
+for (i in 1:num.for){ #main for loop
+  if (i<= (num.for/3)){ #generates 2000 samples of squares
+    matrix_storage2 <- cbind(matrix_storage2, image.generator("square"))}
+  if ((num.for/3) < i && i<= (num.for*(2/3))){
+    matrix_storage2 <- cbind(matrix_storage2, image.generator("random"))
   }
-  if (4000 < i&& i <= 6000){
-    matrix_storage2[[i]] <- image.generator("lines")
+  if ((num.for*(2/3)) < i&& i <= num.for){
+    matrix_storage2 <- cbind(matrix_storage2, image.generator("lines"))
   }
 }
 #generates the category name data of 2000 square, random, and line images
-category_names2 <- array(c(rep(0, 2000), rep(1, 2000), rep(2, 2000)), 6000)
+category_names2 <- array(c(0,rep(0, 333), rep(1, 333), rep(2, 333)), 1000)
 #0 corresponds to square
 #1 corresponds to random
 #2 corresponds to lines
 
 #Generates test data
 # this makes a list of 700 of each image category in a row
-for (i in 1:2100){
-  if (i<= 700){
-    matrix_storage[[i]] <- image.generator("square")}
-  if (700< i && i<= 1400){
-    matrix_storage[[i]] <- image.generator("random")
+num.for2 <- 333
+for (i in 1:num.for2){ #main for loop
+  if (i<= (num.for2/3)){ #generates 2000 samples of squares
+    matrix_storage <- cbind(matrix_storage, image.generator("square"))}
+  if ((num.for2/3) < i && i<= (num.for2*(2/3))){
+    matrix_storage <- cbind(matrix_storage, image.generator("random"))
   }
-  if (1400< i && i<= 2100){
-    matrix_storage[[i]] <- image.generator("lines")
+  if ((num.for2*(2/3)) < i&& i <= num.for2){
+    matrix_storage <- cbind(matrix_storage, image.generator("lines"))
   }
-  }
+}
 
 #generates the category name data of 700 square, random, and line images
-category_names <- array(c(rep(0, 700), rep(1, 700), rep(2, 700)), 2100) #generates a list of category names
+category_names <- array(c(rep(0, 112), rep(1, 111), rep(2, 111)), 334) #generates a list of category names
 #0 corresponds to square
 #1 corresponds to random
 #2 corresponds to lines
@@ -120,8 +122,8 @@ save(matrix_storage, file="matrix_storage.RData")
 save(matrix_storage2, file= "matrix_storage2.Rdata")
 
 #rearrange Data in to Arrays to make them fit the input
-arr_matrix_storage <- array(unlist(matrix_storage), dim=c(2100, 100, 100))
-arr_matrix_storage2 <- array(unlist(matrix_storage2), dim=c(6000, 100, 100))
+arr_matrix_storage <- array(as.vector(matrix_storage), dim=c(334,100, 100))
+arr_matrix_storage2 <- array(as.vector(matrix_storage2), dim=c(1000, 100, 100))
 ###################################################################################################
 
 #I chose to rename my data to match examples
@@ -135,35 +137,35 @@ class_names = c('square',
 loss<- c()
 accuracy <-c()
 ## Building My Basic Model
-  my_model <- keras_model_sequential()
-  my_model %>%
-    layer_flatten(input_shape = c(100,100)) %>%
-    layer_dense(units =100, activation = 'relu') %>% #I count this as layer 1
-    layer_dropout(rate = 0.5) %>%
-    layer_dense(units = 5, activation = 'relu') %>%  #Icount this as layer 2
-    layer_dense(units = 100, activation = 'relu') %>% #I count this as layer 3
-    layer_dense(units =3, activation = 'softmax')
-  
-  my_model %>% compile(
-    loss = loss_categorical_crossentropy,
-    optimizer = optimizer_adadelta(),
-    metrics = c('accuracy')
-  )
-# saving model and running it on different data 
-  history5<- as.data.frame(my_model %>% fit (x_train, y_train, epochs = 5)) #I manually changed this line
-    #with the number corresponding to the number of nodes
-  score <- my_model %>% evaluate(x_test, y_test)
-  
-  cat('Test loss', score$loss, "\n")
-  cat('Test accuracy', score$acc, "\n")
-  
-  loss <- c(loss, score$loss)
-  accuracy <- c(accuracy, score$acc)
+my_model <- keras_model_sequential()
+my_model %>%
+  layer_flatten(input_shape = c(100,100)) %>%
+  layer_dense(units =100, activation = 'relu') %>% #I count this as layer 1
+  layer_dropout(rate = 0.5) %>%
+  layer_dense(units = 5, activation = 'relu') %>%  #Icount this as layer 2
+  layer_dense(units = 100, activation = 'relu') %>% #I count this as layer 3
+  layer_dense(units =3, activation = 'softmax')
 
-  #this is data that I manually recorded (don't be mad I thought it was more time efficient)
+my_model %>% compile(
+  loss = loss_categorical_crossentropy,
+  optimizer = optimizer_adadelta(),
+  metrics = c('accuracy')
+)
+# saving model and running it on different data 
+history5<- as.data.frame(my_model %>% fit (x_train, y_train, epochs = 10)) #I manually changed this line
+#with the number corresponding to the number of nodes
+score <- my_model %>% evaluate(x_test, y_test)
+
+cat('Test loss', score$loss, "\n")
+cat('Test accuracy', score$acc, "\n")
+
+loss <- c(loss, score$loss)
+accuracy <- c(accuracy, score$acc)
+
+#this is data that I manually recorded (don't be mad I thought it was more time efficient)
 Nodes1<- (1:5)
-tl1 <- c( 1.35 ,3.37, 2.59, 2.65, 2.09)
-ta1 <- c(0.32, 0.31, .32, 0.33, 0.30)
+tl1 <- c( 1.98 ,2.24, 2.21, 1.98, 3.20)
+ta1 <- c(0.33, 0.35, 0.27, 0.2485, 0.3323)
 Test_loss <- data_frame(
   "tl" <- tl1,
   "Nodes" <- Nodes1
@@ -188,36 +190,36 @@ f.accdata5 <- filter(history5, metric == "accuracy")
 
 #plotting loss across epochs
 #this generate a graph of final loss on test data for the node values
-test.loss <- ggplot() + geom_line(data=Test_loss, aes(x = Nodes, y= tl))+
+test.loss <- ggplot() + geom_line(data=Test_loss, aes(x = Nodes1, y= tl1))+
   xlab('Nodes') +
   ylab('Test Loss')
 #this generates a graph of final accuracy on test data for the node values
-test.accuracies <- ggplot() + geom_line(data=Test_accuracies, aes(x = Nodes, y= ta))+
+test.accuracies <- ggplot() + geom_line(data=Test_accuracies, aes(x = Nodes1, y= ta1))+
   xlab('Nodes') +
   ylab('Test Accuracy')
 #this generates graphs of loss during training for each node
 graph.loss <-  ggplot() + 
-    geom_line(data = f.lossdata1, aes(x = epoch, y = value, color = "1 node")) +
-    geom_line(data = f.lossdata2, aes(x = epoch, y = value, color = "2 nodes")) +
-    geom_line(data = f.lossdata3, aes(x = epoch, y = value, color = "3 nodes")) +
-    geom_line(data = f.lossdata4, aes(x = epoch, y = value, color = "4 nodes")) +
-    geom_line(data = f.lossdata5, aes(x = epoch, y = value, color = "5 nodes")) +
-    xlab('Epoch') +
-    ylab('Loss') + theme(legend.position = c(1,1),
-      legend.justification = c("right", "top"))
+  geom_line(data = f.lossdata1, aes(x = epoch, y = value, color = "1 node")) +
+  geom_line(data = f.lossdata2, aes(x = epoch, y = value, color = "2 nodes")) +
+  geom_line(data = f.lossdata3, aes(x = epoch, y = value, color = "3 nodes")) +
+  geom_line(data = f.lossdata4, aes(x = epoch, y = value, color = "4 nodes")) +
+  geom_line(data = f.lossdata5, aes(x = epoch, y = value, color = "5 nodes")) +
+  xlab('Epoch') +
+  ylab('Loss') + theme(legend.position = c(1,1),
+                       legend.justification = c("right", "top"))
 #this generates graphs of accuracy during training for each node
 graph.acc <-  ggplot() + 
-    geom_line(data = f.accdata1, aes(x = epoch, y = value, colour = "1 node"))+
-    geom_line(data = f.accdata2, aes(x = epoch, y = value, colour = "2 nodes")) +
-    geom_line(data = f.accdata3, aes(x = epoch, y = value, color = "3 nodes")) +
-    geom_line(data = f.accdata4, aes(x = epoch, y = value, color = "4 nodes")) +
-    geom_line(data = f.accdata5, aes(x = epoch, y = value, color = "5 nodes")) +
-    xlab('Epoch') +
-    ylab('Accuracy') + 
-    theme(legend.position = c(1,1),
-      legend.justification = c("right", "top"))
+  geom_line(data = f.accdata1, aes(x = epoch, y = value, colour = "1 node"))+
+  geom_line(data = f.accdata2, aes(x = epoch, y = value, colour = "2 nodes")) +
+  geom_line(data = f.accdata3, aes(x = epoch, y = value, color = "3 nodes")) +
+  geom_line(data = f.accdata4, aes(x = epoch, y = value, color = "4 nodes")) +
+  geom_line(data = f.accdata5, aes(x = epoch, y = value, color = "5 nodes")) +
+  xlab('Epoch') +
+  ylab('Accuracy') + 
+  theme(legend.position = c(1,1),
+        legend.justification = c("right", "top"))
 #the next line stitches the above graphs together
-ggarrange( graph.acc, graph.loss, test.loss, test.accuracies + rremove("x.text"), 
+ggarrange(graph.acc, graph.loss, test.loss, test.accuracies + rremove("x.text"), 
           labels = c("A", "B", "C", "D"),
           ncol = 2, nrow = 2)
 ############################## Create second DNN with 4 layers ##############################
@@ -289,10 +291,12 @@ x_test <-arr_matrix_storage
 #I reshape my arrays to match the input layer of the autoencoder
 # but this proved difficult as the visualizations were a composite of all three category types
 # which while interesting was definitely wrong.
-#x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
-x_train <- matrix(arr_matrix_storage2, 6000, 100*100)
-#x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
-x_test <- matrix(arr_matrix_storage2, 6000, 100*100)
+x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
+x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
+x_train <- matrix(arr_matrix_storage2, 1000, 100*100)
+x_test <- matrix(arr_matrix_storage, 334, 100*100)
+arr_matrix_storage <- array(as.vector(matrix_storage), dim=c(334,100, 100))
+arr_matrix_storage2 <- array(as.vector(matrix_storage2), dim=c(1000, 100, 100))
 #Building the model -----------------------------------------------------
 
 #initialize the variables and define the bottlenecks
@@ -368,18 +372,7 @@ input_data_image <- image(matrix(x_test, nrow=100, ncol=100))
 #I'm not sure if the following images were extracted correctly
 #they seem to give a lot of noise
 
-x_test1 <- list() #These lines generate a single image for prediction
-x_test1 <- list(x_test1, lines(image.blank))
-x_test1 <- array(unlist(x_test1), dim=c(1, 100, 100))
-x_test1 <- array_reshape(x_test1, c(nrow(x_test1), 10000), order = "F")
-y <- predict(encoder, x_test1) #predict with the encoder
-matrix.y <- matrix(y, ncol=100, nrow=100)
-image(matrix.y)
-
-#replicate the results of the ouput
-y2 <-predict(vae, x_test1)
-matrix.y2 <- matrix(y2, ncol=100, nrow=100)
-image(matrix.y2) #image of eutoencoders ouput
+#These lines generate a single image for prediction
 
 z_test <- predict(vae, x_test, batch_size = batch_size)
 z_test_map1 <- matrix(z_test[1,], nrow=100, ncol=100)
@@ -431,37 +424,37 @@ for(i in 1:length(grid_x)){ #create main for loop
 rows %>% as.raster() %>% plot() #plot it
 ########################################################PLOT.IRIS FUNCTION#############################
 #https://cran.r-project.org/web/packages/umap/vignettes/umap.html
- plot.iris <- function(x, labels, #variables and labels
-          main="A UMAP visualization of x_test_encoded", #title of plot
-          colors=c("#ff7f00", "#e377c2", "#17becf"), #colors of dots
-          pad=0.1, cex=0.65, pch=19, add=FALSE, legend.suffix="", #legend specifications
-          cex.main=1, cex.legend=1) {
-
-   layout = x
-   if (is(x, "umap")) {
-     layout = x$layout
-   } 
-   
-   xylim = range(layout)
-   xylim = xylim + ((xylim[2]-xylim[1])*pad)*c(-0.5, 0.5)
-   if (!add) {
-     par(mar=c(0.2,0.7,1.2,0.7), ps=10)
-     plot(xylim, xylim, type="n", axes=F, frame=F)
-     rect(xylim[1], xylim[1], xylim[2], xylim[2], border="#aaaaaa", lwd=0.25)  
-   }
-   points(layout[,1], layout[,2], col=colors[as.integer(labels+1)],
-          cex=cex, pch=pch)
-   mtext(side=3, main, cex=cex.main)
- 
-   labels.u = unique(labels)
-   legend.pos = "topright"
-   legend.text = as.character(labels.u)
-   if (add) {
-     legend.pos = "bottomright"
-     legend.text = paste(as.character(labels.u), legend.suffix)
-   }
-   legend(legend.pos, legend=legend.text,
-          col=colors[as.integer(labels.u)+1],
+plot.iris <- function(x, labels, #variables and labels
+                      main="A UMAP visualization of x_test_encoded", #title of plot
+                      colors=c("#ff7f00", "#e377c2", "#17becf"), #colors of dots
+                      pad=0.1, cex=0.65, pch=19, add=FALSE, legend.suffix="", #legend specifications
+                      cex.main=1, cex.legend=1) {
+  
+  layout = x
+  if (is(x, "umap")) {
+    layout = x$layout
+  } 
+  
+  xylim = range(layout)
+  xylim = xylim + ((xylim[2]-xylim[1])*pad)*c(-0.5, 0.5)
+  if (!add) {
+    par(mar=c(0.2,0.7,1.2,0.7), ps=10)
+    plot(xylim, xylim, type="n", axes=F, frame=F)
+    rect(xylim[1], xylim[1], xylim[2], xylim[2], border="#aaaaaa", lwd=0.25)  
+  }
+  points(layout[,1], layout[,2], col=colors[as.integer(labels+1)],
+         cex=cex, pch=pch)
+  mtext(side=3, main, cex=cex.main)
+  
+  labels.u = unique(labels)
+  legend.pos = "topright"
+  legend.text = as.character(labels.u)
+  if (add) {
+    legend.pos = "bottomright"
+    legend.text = paste(as.character(labels.u), legend.suffix)
+  }
+  legend(legend.pos, legend=legend.text,
+         col=colors[as.integer(labels.u)+1],
          bty="n", pch=pch, cex=cex.legend)
 }
 
