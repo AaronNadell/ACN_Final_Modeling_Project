@@ -257,14 +257,14 @@ my_model2 %>% compile(
 
 history <- my_model2 %>% fit(
   x_train, y_train,
-  epochs = 5,
-  callbacks = callback_tensorboard("logs/run_n5")
+  epochs = 10,
+  callbacks = callback_tensorboard("logs/run_n05")
 )
-callback_tensorboard(log_dir = "logs/run_n1")
-callback_tensorboard(log_dir = "logs/run_n2")
-callback_tensorboard(log_dir = "logs/run_n3")
-callback_tensorboard(log_dir = "logs/run_n4")
-callback_tensorboard(log_dir = "logs/run_n5")
+callback_tensorboard(log_dir = "logs/run_n01")
+callback_tensorboard(log_dir = "logs/run_n02")
+callback_tensorboard(log_dir = "logs/run_n03")
+callback_tensorboard(log_dir = "logs/run_n04")
+callback_tensorboard(log_dir = "logs/run_n05")
 tensorboard("logs")
 
 #with the number corresponding to the number of nodes
@@ -291,16 +291,18 @@ K <- keras::backend()
 #I again rename my variables to better fit the examples
 x_train <- arr_matrix_storage2
 x_test <-arr_matrix_storage
+
+arr_matrix_storage <- array(as.vector(matrix_storage), dim=c(334,100, 100))
+arr_matrix_storage2 <- array(as.vector(matrix_storage2), dim=c(1000, 100, 100))
 #I reshape my arrays to match the input layer of the autoencoder
 # but this proved difficult as the visualizations were a composite of all three category types
 # which while interesting was definitely wrong.
-#x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
-#x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
+x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
+x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
 #x_train <- matrix(arr_matrix_storage2, 1000, 100*100)
 #x_test <- matrix(arr_matrix_storage, 334, 100*100)
 #This is a better formating
-arr_matrix_storage <- array(as.vector(matrix_storage), dim=c(334,100, 100))
-arr_matrix_storage2 <- array(as.vector(matrix_storage2), dim=c(1000, 100, 100))
+
 #Building the model -----------------------------------------------------
 
 #initialize the variables and define the bottlenecks
@@ -361,11 +363,13 @@ vae %>% compile(optimizer = "adam", loss ='mean_squared_error', metric= 'mse')
 vae %>% fit(
   x_train, x_train, 
   shuffle = TRUE, 
-  epochs = 3, 
+  epochs = epochs,
+  callbacks = callback_tensorboard("vaelog1/run_n01"),
   batch_size = batch_size, 
   validation_data = list(x_test, x_test)
 )
-
+callback_tensorboard(log_dir = "vaelog1/run_n01")
+tensorboard("vaelog1")
 # Visualizations ----------------------------------------------------------
 
 #creates a matrix of predicted values based on x_test
@@ -421,7 +425,7 @@ for(i in 1:length(grid_x)){ #create main for loop
   column <- NULL #initialize the variables
   for(j in 1:length(grid_y)){ #create secondary for loop
     z_sample <- matrix(c(grid_x[i], grid_y[j]), ncol = 100) #create a simple matrix
-    column <- rbind(column, predict(generator, z_sample) %>% matrix(ncol = 100) ) #stitch it into a column matrix
+    column <- rbind(column, predict(generator, z_sample) %>% matrix(ncol = 100) ) #stitch predictions into a column matrix
   }
   rows <- cbind(rows, column) #stitch into overall matrix
 }
