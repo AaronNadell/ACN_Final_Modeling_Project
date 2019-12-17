@@ -291,10 +291,11 @@ x_test <-arr_matrix_storage
 #I reshape my arrays to match the input layer of the autoencoder
 # but this proved difficult as the visualizations were a composite of all three category types
 # which while interesting was definitely wrong.
-x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
-x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
-x_train <- matrix(arr_matrix_storage2, 1000, 100*100)
-x_test <- matrix(arr_matrix_storage, 334, 100*100)
+#x_train <- array_reshape(arr_matrix_storage2, c(nrow(arr_matrix_storage2), 10000), order = "C")
+#x_test <- array_reshape(arr_matrix_storage, c(nrow(arr_matrix_storage), 10000), order = "C")
+#x_train <- matrix(arr_matrix_storage2, 1000, 100*100)
+#x_test <- matrix(arr_matrix_storage, 334, 100*100)
+#This is a better formating
 arr_matrix_storage <- array(as.vector(matrix_storage), dim=c(334,100, 100))
 arr_matrix_storage2 <- array(as.vector(matrix_storage2), dim=c(1000, 100, 100))
 #Building the model -----------------------------------------------------
