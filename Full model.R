@@ -243,9 +243,9 @@ my_model2 %>%
   layer_flatten(input_shape = c(100,100)) %>%
   layer_dense(units =100, activation = 'relu') %>% #I count this as layer 1
   layer_dropout(rate = 0.5) %>%
-  layer_dense(units = 5, activation = 'relu') %>% #I count this as layer 2
+  layer_dense(units = 5, activation = 'relu') %>% #I count this as layer 2 I change this layer
   layer_dropout(rate = 0.5) %>%
-  layer_dense(units = 5, activation = 'relu') %>% #I count this as layer 3
+  layer_dense(units = 5, activation = 'relu') %>% #I count this as layer 3 I changed this layer as well
   layer_dense(units = 100, activation = 'relu') %>% # I count this as layer 4
   layer_dense(units =3, activation = 'softmax')
 
@@ -255,14 +255,17 @@ my_model2 %>% compile(
   metrics = c('accuracy')
 )
 
-tensorboard("logs/run_a") #hey look I'm wising up and using tensorboard :)
-
 history <- my_model2 %>% fit(
   x_train, y_train,
   epochs = 5,
-  callbacks = callback_tensorboard("logs/run_a")
+  callbacks = callback_tensorboard("logs/run_n5")
 )
-
+callback_tensorboard(log_dir = "logs/run_n1")
+callback_tensorboard(log_dir = "logs/run_n2")
+callback_tensorboard(log_dir = "logs/run_n3")
+callback_tensorboard(log_dir = "logs/run_n4")
+callback_tensorboard(log_dir = "logs/run_n5")
+tensorboard("logs")
 
 #with the number corresponding to the number of nodes
 score <- my_model %>% evaluate(x_test, y_test)
